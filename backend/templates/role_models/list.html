@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p>Управление ролевыми моделями и профилями доступа</p>
+{% endblock %}
+
+{% block content %}
+<div class="role-models-grid">
+    {% for role_model in role_models %}
+    <div class="role-model-card" onclick="window.location.href='/role-models/{{ role_model.id }}'">
+        <div class="role-model-header">
+            <div class="role-model-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="role-model-info">
+                <h3>{{ role_model.name }}</h3>
+                <p>{{ role_model.description or "Описание отсутствует" }}</p>
+            </div>
+        </div>
+        
+        <div class="role-model-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ role_model.profiles|length }}</span>
+                <span class="stat-label">Профилей</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Сотрудников</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Доступов</span>
+            </div>
+        </div>
+        
+        <div class="role-model-actions">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.location.href='/role-models/{{ role_model.id }}'">
+                <i class="fas fa-eye"></i> Просмотр
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); window.location.href='/role-models/{{ role_model.id }}/edit'">
+                <i class="fas fa-edit"></i> Редактировать
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if not role_models %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h3>Ролевые модели не найдены</h3>
+        <p>Создайте первую ролевую модель для управления доступами сотрудников</p>
+        <button class="btn btn-primary">
+            <i class="fas fa-plus"></i> Создать ролевую модель
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // TODO: Добавить реальную статистику по сотрудникам и доступам
+    // TODO: Добавить фильтрацию и поиск
+    // TODO: Добавить создание новых ролевых моделей
+</script>
+{% endblock %}

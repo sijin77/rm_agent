@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title or "Ролевые модели" }}{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/styles.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        {% block header %}
+        <div class="header">
+            <div class="header-info">
+                <h1>{% block page_title %}{{ page_title or "Ролевые модели" }}{% endblock %}</h1>
+                {% block page_subtitle %}{% endblock %}
+            </div>
+        </div>
+        {% endblock %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Центральное меню ИИ-инструментов -->
+    <div class="ai-tools-center" id="aiToolsCenter">
+        <button class="ai-tools-center-btn" onclick="aiMergeProfiles()">
+            <i class="fas fa-compress-arrows-alt"></i>
+            Объединить
+        </button>
+        <button class="ai-tools-center-btn" onclick="aiAnalyzeOverlap()">
+            <i class="fas fa-project-diagram"></i>
+            Анализ
+        </button>
+        <button class="ai-tools-center-btn" onclick="aiGenerateReport()">
+            <i class="fas fa-chart-bar"></i>
+            Отчет
+        </button>
+    </div>
+
+    <!-- Минимальная кнопка чата -->
+    <div class="chat-input-minimal" id="chatMinimal" onclick="openContextChat()">
+        <i class="fas fa-comments"></i>
+    </div>
+
+    <!-- Контекстный чат -->
+    <div class="context-chat" id="contextChat">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <div class="chat-title">ИИ-Ассистент</div>
+                    <div class="chat-context" id="chatContext">{% block chat_context %}Общий чат{% endblock %}</div>
+                </div>
+            </div>
+            <button class="close-chat" onclick="closeContextChat()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai">
+                <div class="chat-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-message-content">
+                    {% block chat_welcome %}Привет! Я помогу тебе с управлением ролевыми моделями. Используй кнопки ИИ-инструментов или задай вопрос.{% endblock %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="chat-input-container">
+                <textarea class="chat-input" id="chatInput" placeholder="{% block chat_placeholder %}Задай вопрос...{% endblock %}" rows="1"></textarea>
+                <button class="chat-send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let currentContext = null;
+        let chatHistory = [];
+        let conversationId = null;
+
+        function openContextChat() {
+            document.getElementById('contextChat').classList.add('active');
+            document.getElementById('chatMinimal').classList.add('hidden');
+        }
+
+        function closeContextChat() {
+            document.getElementById('contextChat').classList.remove('active');
+            document.getElementById('chatMinimal').classList.remove('hidden');
+            document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
+            currentContext = null;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/v1/chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: currentContext,
+                        conversation_id: conversationId
+                    })
+                });
+                
+                const data = await response.json();
+                conversationId = data.conversation_id;
+                addAIMessage(data.message);
+                
+            } catch (error) {
+                console.error('Ошибка отправки сообщения:', error);
+                addAIMessage('Извините, произошла ошибка. Попробуйте еще раз.');
+            }
+        }
+
+        function addUserMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message user';
+            messageDiv.innerHTML = `
+                <div class="chat-message-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="chat-message-content">${message}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addAIMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ai';
+            messageDiv.innerHTML = `
+                <div class="chat-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-message-content">${message}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Обработка Enter в поле ввода
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ИИ-инструменты (заглушки)
+        async function callAITool(toolName, context = {}) {
+            try {
+                addAIMessage(`🔧 Выполняю ${toolName}...`);
+                
+                // TODO: Реальная интеграция с ИИ-инструментами
+                const response = await fetch(`/api/v1/ai-tools/${toolName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tool_name: toolName,
+                        context: context,
+                        parameters: {}
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addAIMessage(`✅ ${data.message}`);
+                } else {
+                    addAIMessage(`❌ ${data.message}`);
+                }
+                
+            } catch (error) {
+                console.error('Ошибка вызова ИИ-инструмента:', error);
+                addAIMessage('❌ Произошла ошибка при выполнении инструмента.');
+            }
+        }
+
+        // Центральные ИИ-инструменты
+        function aiMergeProfiles() {
+            callAITool('profiles/merge');
+        }
+
+        function aiAnalyzeOverlap() {
+            callAITool('analyze-overlap');
+        }
+
+        function aiGenerateReport() {
+            callAITool('generate-report');
+        }
+
+        {% block extra_js %}{% endblock %}
+    </script>
+</body>
+</html>

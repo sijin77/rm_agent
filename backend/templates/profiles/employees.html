@@ -1,0 +1,498 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p>Сотрудники, соответствующие критериям профиля</p>
+{% endblock %}
+
+{% block content %}
+<div class="profile-employees">
+    <!-- Информация о профиле -->
+    <div class="profile-info-section">
+        <div class="profile-header">
+            <div class="profile-icon">
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <div class="profile-details">
+                <h2>{{ profile.name }}</h2>
+                <p>{{ profile.description or "Описание отсутствует" }}</p>
+                <div class="profile-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-users"></i>
+                        {{ employees|length }} сотрудников
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-building"></i>
+                        Ролевая модель: {{ role_model.name }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='/role-models/{{ role_model.id }}'">
+                <i class="fas fa-arrow-left"></i> Назад к модели
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-edit"></i> Редактировать профиль
+            </button>
+        </div>
+    </div>
+
+    <!-- Критерии профиля -->
+    <div class="criteria-section">
+        <h3><i class="fas fa-filter"></i> Критерии попадания</h3>
+        <div class="criteria-grid">
+            {% if profile.criteria %}
+                {% if profile.criteria.get('employee_profiles') %}
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <i class="fas fa-id-card"></i>
+                        Профили сотрудников
+                    </div>
+                    <div class="criteria-values">
+                        {% for profile_type in profile.criteria.employee_profiles %}
+                        <span class="criteria-tag">{{ profile_type }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if profile.criteria.get('positions') %}
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <i class="fas fa-briefcase"></i>
+                        Должности
+                    </div>
+                    <div class="criteria-values">
+                        {% for position in profile.criteria.positions %}
+                        <span class="criteria-tag">{{ position }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if profile.criteria.get('org_units_type') %}
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <i class="fas fa-building"></i>
+                        Подразделения
+                    </div>
+                    <div class="criteria-values">
+                        {% for unit_type in profile.criteria.org_units_type %}
+                        <span class="criteria-tag">{{ unit_type }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if profile.criteria.get('employee_types') %}
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <i class="fas fa-user-check"></i>
+                        Типы сотрудников
+                    </div>
+                    <div class="criteria-values">
+                        {% for emp_type in profile.criteria.employee_types %}
+                        <span class="criteria-tag">{{ emp_type }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if profile.criteria.get('all_employees') %}
+                <div class="criteria-item">
+                    <div class="criteria-label">
+                        <i class="fas fa-globe"></i>
+                        Охват
+                    </div>
+                    <div class="criteria-values">
+                        <span class="criteria-tag">Все сотрудники</span>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="criteria-item">
+                <div class="criteria-label">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Критерии
+                </div>
+                <div class="criteria-values">
+                    <span class="criteria-tag warning">Критерии не заданы</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Список сотрудников -->
+    <div class="employees-section">
+        <div class="section-header">
+            <h3><i class="fas fa-users"></i> Сотрудники ({{ employees|length }})</h3>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Поиск сотрудников..." id="employeeSearch">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Экспорт
+                </button>
+            </div>
+        </div>
+        
+        {% if employees %}
+        <div class="employees-table">
+            <div class="table-header">
+                <div class="col-name">Сотрудник</div>
+                <div class="col-position">Должность</div>
+                <div class="col-department">Подразделение</div>
+                <div class="col-type">Тип</div>
+                <div class="col-actions">Действия</div>
+            </div>
+            
+            {% for employee in employees %}
+            <div class="table-row">
+                <div class="col-name">
+                    <div class="employee-info">
+                        <div class="employee-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="employee-details">
+                            <div class="employee-name">{{ employee.name or "Не указано" }}</div>
+                            <div class="employee-email">{{ employee.email or "Не указано" }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-position">{{ employee.position or "Не указано" }}</div>
+                <div class="col-department">{{ employee.department or "Не указано" }}</div>
+                <div class="col-type">{{ employee.employee_type or "Не указано" }}</div>
+                <div class="col-actions">
+                    <button class="btn btn-sm btn-secondary">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-secondary">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Сотрудники не найдены</h3>
+            <p>Никто из сотрудников не соответствует критериям этого профиля</p>
+            <div class="empty-state-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Изменить критерии
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-refresh"></i> Обновить данные
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block chat_context %}Профиль: {{ profile.name }}{% endblock %}
+
+{% block chat_placeholder %}Задай вопрос о профиле или сотрудниках...{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-employees {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-info-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    border: 1px solid #e9ecef;
+}
+
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.profile-icon {
+    width: 60px;
+    height: 60px;
+    background: #17a2b8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.profile-details h2 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+.profile-details p {
+    margin: 0 0 15px 0;
+    color: #666;
+}
+
+.profile-meta {
+    display: flex;
+    gap: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.criteria-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    border: 1px solid #e9ecef;
+}
+
+.criteria-section h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.criteria-item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.criteria-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.criteria-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.criteria-tag {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.criteria-tag.warning {
+    background: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.employees-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding: 8px 35px 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.employees-table {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+    gap: 15px;
+    background: #f8f9fa;
+    padding: 15px 20px;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+    gap: 15px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f3f4;
+    align-items: center;
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+.table-row:hover {
+    background: #f8f9ff;
+}
+
+.employee-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.employee-avatar {
+    width: 40px;
+    height: 40px;
+    background: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.employee-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.employee-email {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.col-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state-icon {
+    width: 80px;
+    height: 80px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: #666;
+    font-size: 2rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+.empty-state p {
+    margin: 0 0 30px 0;
+    color: #666;
+}
+
+.empty-state-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // TODO: Реализовать поиск сотрудников
+    document.getElementById('employeeSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.table-row');
+        
+        rows.forEach(row => {
+            const name = row.querySelector('.employee-name').textContent.toLowerCase();
+            const email = row.querySelector('.employee-email').textContent.toLowerCase();
+            const position = row.querySelector('.col-position').textContent.toLowerCase();
+            const department = row.querySelector('.col-department').textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || email.includes(searchTerm) || 
+                position.includes(searchTerm) || department.includes(searchTerm)) {
+                row.style.display = 'grid';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // TODO: Реализовать экспорт данных
+    // TODO: Реализовать редактирование профиля
+    // TODO: Реализовать просмотр детальной информации о сотруднике
+</script>
+{% endblock %}

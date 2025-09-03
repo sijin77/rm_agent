@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block page_subtitle %}
+<p>{{ role_model.description or "Детальная информация о ролевой модели" }}</p>
+{% endblock %}
+
+{% block content %}
+<div class="role-model-detail">
+    <!-- Основная информация -->
+    <div class="info-section">
+        <div class="section-header">
+            <h2><i class="fas fa-info-circle"></i> Информация о модели</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary" onclick="window.location.href='/role-models/{{ role_model.id }}/edit'">
+                    <i class="fas fa-edit"></i> Редактировать
+                </button>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Название:</label>
+                <span>{{ role_model.name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Описание:</label>
+                <span>{{ role_model.description or "Не указано" }}</span>
+            </div>
+            <div class="info-item">
+                <label>Дата создания:</label>
+                <span>{{ role_model.created_at.strftime('%d.%m.%Y %H:%M') if role_model.created_at else "Не указано" }}</span>
+            </div>
+            <div class="info-item">
+                <label>Последнее обновление:</label>
+                <span>{{ role_model.updated_at.strftime('%d.%m.%Y %H:%M') if role_model.updated_at else "Не указано" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Профили ролей -->
+    <div class="profiles-section">
+        <div class="section-header">
+            <h2><i class="fas fa-users"></i> Профили ролей ({{ profiles|length }})</h2>
+            <div class="section-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить профиль
+                </button>
+            </div>
+        </div>
+        
+        {% if profiles %}
+        <div class="profiles-grid">
+            {% for profile in profiles %}
+            <div class="profile-card" onclick="window.location.href='/role-models/{{ role_model.id }}/profiles/{{ profile.id }}/employees'">
+                <div class="profile-header">
+                    <div class="profile-icon">
+                        <i class="fas fa-user-tag"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h3>{{ profile.name }}</h3>
+                        <p>{{ profile.description or "Описание отсутствует" }}</p>
+                    </div>
+                </div>
+                
+                <div class="profile-criteria">
+                    <h4>Критерии попадания:</h4>
+                    <div class="criteria-list">
+                        {% if profile.criteria %}
+                            {% if profile.criteria.get('employee_profiles') %}
+                            <div class="criteria-item">
+                                <i class="fas fa-id-card"></i>
+                                <span>Профили: {{ profile.criteria.employee_profiles|join(', ') }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if profile.criteria.get('positions') %}
+                            <div class="criteria-item">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Должности: {{ profile.criteria.positions|join(', ') }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if profile.criteria.get('org_units_type') %}
+                            <div class="criteria-item">
+                                <i class="fas fa-building"></i>
+                                <span>Подразделения: {{ profile.criteria.org_units_type|join(', ') }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if profile.criteria.get('employee_types') %}
+                            <div class="criteria-item">
+                                <i class="fas fa-user-check"></i>
+                                <span>Типы: {{ profile.criteria.employee_types|join(', ') }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if profile.criteria.get('all_employees') %}
+                            <div class="criteria-item">
+                                <i class="fas fa-globe"></i>
+                                <span>Все сотрудники</span>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="criteria-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Критерии не заданы</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Сотрудников</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">0</span>
+                        <span class="stat-label">Доступов</span>
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); window.location.href='/role-models/{{ role_model.id }}/profiles/{{ profile.id }}/employees'">
+                        <i class="fas fa-users"></i> Сотрудники
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editProfile({{ profile.id }})">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <h3>Профили не найдены</h3>
+            <p>Создайте первый профиль для определения критериев доступа</p>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать профиль
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block chat_context %}Ролевая модель: {{ role_model.name }}{% endblock %}
+
+{% block extra_js %}
+<script>
+    function editProfile(profileId) {
+        // TODO: Реализовать редактирование профиля
+        alert(`Редактирование профиля ${profileId} - TODO`);
+    }
+
+    // TODO: Добавить реальную статистику по сотрудникам и доступам
+    // TODO: Добавить создание новых профилей
+    // TODO: Добавить редактирование профилей
+</script>
+{% endblock %}

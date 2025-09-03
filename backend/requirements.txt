@@ -1,0 +1,25 @@
+# FastAPI и ASGI
+fastapi
+uvicorn[standard]
+
+# Database
+sqlalchemy[asyncio]
+aiosqlite
+
+# Validation
+pydantic
+pydantic-settings
+email-validator
+
+# ML Libraries (добавим позже когда понадобятся)
+# scikit-learn
+# pandas
+# numpy
+# umap-learn
+
+# HTTP Client для LLM
+httpx
+
+# Development
+pytest
+pytest-asyncio
