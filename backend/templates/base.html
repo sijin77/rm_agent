@@ -3,17 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ page_title or "Ролевые модели" }}{% endblock %}</title>
+    <title>{% block title %}Тестовая страница{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', path='/css/styles.css') }}" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+    
+    <!-- Стили для AI tools (как в styles.css) -->
+    <style>
+        .ai-tools-center {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #e9ecef;
+            padding: 6px 8px;
+            display: flex;
+            gap: 6px;
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            width: fit-content;
+        }
+        
+        .ai-tools-center-btn {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .ai-tools-center-btn:hover {
+            background: #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
+        
+        .ai-tools-center-btn i {
+            font-size: 0.9rem;
+        }
+        
+        .chat-input-minimal {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #17a2b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+            z-index: 1000;
+        }
+        
+        .chat-input-minimal:hover {
+            background: #138496;
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(23, 162, 184, 0.4);
+        }
+        
+        /* Стили для чата */
+        .context-chat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #e9ecef;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .context-chat.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .chat-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-avatar {
+            width: 35px;
+            height: 35px;
+            background: #17a2b8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .chat-title {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .chat-context {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .close-chat {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-chat:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .chat-message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        
+        .chat-message.user .chat-message-avatar {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .chat-message.ai .chat-message-avatar {
+            background: #f8f9fa;
+            color: #17a2b8;
+        }
+        
+        .chat-message-content {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .chat-message.user .chat-message-content {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .chat-input {
+            flex: 1;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 10px 15px;
+            resize: none;
+            font-size: 0.9rem;
+            max-height: 100px;
+            min-height: 40px;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #17a2b8;
+            box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.1);
+        }
+        
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #17a2b8;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-send-btn:hover {
+            background: #138496;
+            transform: scale(1.1);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         {% block header %}
         <div class="header">
             <div class="header-info">
-                <h1>{% block page_title %}{{ page_title or "Ролевые модели" }}{% endblock %}</h1>
+                <h1>{% block page_title %}Тестовая страница{% endblock %}</h1>
                 {% block page_subtitle %}{% endblock %}
             </div>
         </div>
@@ -22,25 +275,20 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Центральное меню ИИ-инструментов -->
+    <!-- Объединённые AI tools и чат -->
     <div class="ai-tools-center" id="aiToolsCenter">
-        <button class="ai-tools-center-btn" onclick="aiMergeProfiles()">
+        <button class="ai-tools-center-btn" onclick="openContextChat()" title="Открыть чат">
+            <i class="fas fa-comments"></i>
+        </button>
+        <button class="ai-tools-center-btn" onclick="aiMergeProfiles()" title="Объединить профили">
             <i class="fas fa-compress-arrows-alt"></i>
-            Объединить
         </button>
-        <button class="ai-tools-center-btn" onclick="aiAnalyzeOverlap()">
+        <button class="ai-tools-center-btn" onclick="aiAnalyzeOverlap()" title="Анализ пересечений">
             <i class="fas fa-project-diagram"></i>
-            Анализ
         </button>
-        <button class="ai-tools-center-btn" onclick="aiGenerateReport()">
+        <button class="ai-tools-center-btn" onclick="aiGenerateReport()" title="Создать отчёт">
             <i class="fas fa-chart-bar"></i>
-            Отчет
         </button>
-    </div>
-
-    <!-- Минимальная кнопка чата -->
-    <div class="chat-input-minimal" id="chatMinimal" onclick="openContextChat()">
-        <i class="fas fa-comments"></i>
     </div>
 
     <!-- Контекстный чат -->
@@ -81,20 +329,22 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- Восстановленный JavaScript -->
     <script>
+        // Базовые переменные
         let currentContext = null;
         let chatHistory = [];
         let conversationId = null;
 
+        // Функции чата
         function openContextChat() {
             document.getElementById('contextChat').classList.add('active');
-            document.getElementById('chatMinimal').classList.add('hidden');
+            document.getElementById('aiToolsCenter').classList.add('hidden');
         }
 
         function closeContextChat() {
             document.getElementById('contextChat').classList.remove('active');
-            document.getElementById('chatMinimal').classList.remove('hidden');
+            document.getElementById('aiToolsCenter').classList.remove('hidden');
             document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
             currentContext = null;
         }
@@ -109,25 +359,11 @@
             input.value = '';
             
             try {
-                const response = await fetch('/api/v1/chat/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        context: currentContext,
-                        conversation_id: conversationId
-                    })
-                });
-                
-                const data = await response.json();
-                conversationId = data.conversation_id;
-                addAIMessage(data.message);
+                // Заглушка для чата - пока API не реализован
+                addAIMessage('🤖 ' + message + ' (чат в разработке)');
                 
             } catch (error) {
-                console.error('Ошибка отправки сообщения:', error);
-                addAIMessage('Извините, произошла ошибка. Попробуйте еще раз.');
+                addAIMessage('❌ Произошла ошибка при отправке сообщения');
             }
         }
 
@@ -135,12 +371,11 @@
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message user';
-            messageDiv.innerHTML = `
-                <div class="chat-message-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="chat-message-content">${message}</div>
-            `;
+            messageDiv.innerHTML = 
+                '<div class="chat-message-avatar">' +
+                    '<i class="fas fa-user"></i>' +
+                '</div>' +
+                '<div class="chat-message-content">' + message + '</div>';
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
@@ -149,68 +384,118 @@
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message ai';
-            messageDiv.innerHTML = `
-                <div class="chat-message-avatar">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <div class="chat-message-content">${message}</div>
-            `;
+            messageDiv.innerHTML = 
+                '<div class="chat-message-avatar">' +
+                    '<i class="fas fa-robot"></i>' +
+                '</div>' +
+                '<div class="chat-message-content">' + message + '</div>';
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         // Обработка Enter в поле ввода
-        document.getElementById('chatInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
             }
         });
 
-        // ИИ-инструменты (заглушки)
-        async function callAITool(toolName, context = {}) {
-            try {
-                addAIMessage(`🔧 Выполняю ${toolName}...`);
-                
-                // TODO: Реальная интеграция с ИИ-инструментами
-                const response = await fetch(`/api/v1/ai-tools/${toolName}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        tool_name: toolName,
-                        context: context,
-                        parameters: {}
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    addAIMessage(`✅ ${data.message}`);
-                } else {
-                    addAIMessage(`❌ ${data.message}`);
-                }
-                
-            } catch (error) {
-                console.error('Ошибка вызова ИИ-инструмента:', error);
-                addAIMessage('❌ Произошла ошибка при выполнении инструмента.');
-            }
-        }
-
         // Центральные ИИ-инструменты
         function aiMergeProfiles() {
-            callAITool('profiles/merge');
+            console.log('aiMergeProfiles called');
         }
 
         function aiAnalyzeOverlap() {
-            callAITool('analyze-overlap');
+            console.log('aiAnalyzeOverlap called');
         }
 
         function aiGenerateReport() {
-            callAITool('generate-report');
+            console.log('aiGenerateReport called');
         }
+
+        // AI функции для ролевых моделей (из list.html)
+        function aiTool1(modelId) {
+            console.log('aiTool1 called for model:', modelId);
+        }
+        
+        function aiTool2(modelId) {
+            console.log('aiTool2 called for model:', modelId);
+        }
+        
+        function aiTool3(modelId) {
+            console.log('aiTool3 called for model:', modelId);
+        }
+        
+        // Функции для AI tools карточек
+        function toggleAIToolsCard(toolId) {
+            // Закрываем все открытые меню
+            document.querySelectorAll('.ai-tools-menu.active').forEach(menu => {
+                menu.classList.remove('active');
+            });
+            
+            // Открываем нужное меню
+            const menu = document.getElementById(toolId + '-tools');
+            if (menu) {
+                menu.classList.add('active');
+            }
+        }
+        
+        function openAIToolsOnHoverCard(toolId) {
+            const menu = document.getElementById(toolId + '-tools');
+            if (menu && !menu.classList.contains('active')) {
+                menu.classList.add('active');
+            }
+        }
+        
+        // Глобальный обработчик движения мыши
+        document.addEventListener('mousemove', function(e) {
+            if (!e.target || typeof e.target.closest !== 'function') {
+                return;
+            }
+            
+            // Если мышь не над меню и не над триггером, закрываем меню
+            if (!e.target.closest('.ai-tools-menu') && !e.target.closest('.ai-tools-trigger')) {
+                const activeMenus = document.querySelectorAll('.ai-tools-menu.active');
+                if (activeMenus.length > 0) {
+                    // Проверяем, что мышь действительно далеко от меню и триггера
+                    let shouldClose = true;
+                    activeMenus.forEach(menu => {
+                        const rect = menu.getBoundingClientRect();
+                        const distance = Math.sqrt(
+                            Math.pow(e.clientX - (rect.left + rect.width/2), 2) + 
+                            Math.pow(e.clientY - (rect.top + rect.height/2), 2)
+                        );
+                        
+                        const triggerId = menu.id.replace('-tools', '');
+                        const trigger = document.getElementById(triggerId + '-trigger');
+                        let triggerDistance = Infinity;
+                        if (trigger) {
+                            const triggerRect = trigger.getBoundingClientRect();
+                            triggerDistance = Math.sqrt(
+                                Math.pow(e.clientX - (triggerRect.left + triggerRect.width/2), 2) + 
+                                Math.pow(e.clientY - (triggerRect.top + triggerRect.height/2), 2)
+                            );
+                        }
+                        
+                        if (distance < 120 || triggerDistance < 50) {
+                            shouldClose = false;
+                        }
+                    });
+                    
+                    if (shouldClose) {
+                        activeMenus.forEach(menu => {
+                            menu.classList.remove('active');
+                        });
+                    }
+                }
+            }
+        });
 
         {% block extra_js %}{% endblock %}
     </script>
